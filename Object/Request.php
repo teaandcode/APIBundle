@@ -60,7 +60,7 @@ class Request
             return $this->parameters;
         }
 
-        return null;
+        return false;
     }
 
     /**

@@ -30,6 +30,16 @@ interface IHashRepository
     public function create();
 
     /**
+     * Create Hash Entity
+     * 
+     * @access public
+     * @param  integer $id
+     * @param  string $domain
+     * @return TeaAndCode\APIBundle\Interfaces\IHash
+     */
+    public function getByIdAndAppDomain($id, $domain)
+
+    /**
      * Clear expired Hash Entities
      * 
      * @access public

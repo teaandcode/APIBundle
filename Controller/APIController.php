@@ -173,7 +173,7 @@ abstract class APIController extends Controller
         $token = $this
             ->get('doctrine')
             ->getRepository(
-                $this->container->getParameter('api_app_repository')
+                $this->container->getParameter('api_token_repository')
             )
             ->findOneById($accessToken);
 
@@ -192,6 +192,22 @@ abstract class APIController extends Controller
         }
 
         return $this->sendResponse($this->$function($requestObject));
+    }
+
+    /**
+     * Returns error messages
+     * 
+     * @access public
+     * @return array
+     */
+    public function getMessagesAction()
+    {
+        return $this->render(
+            'TeaAndCodeAPIBundle:API:messages.html.twig',
+            array(
+                'messages' => $this->messages
+            )
+		);
     }
 
     /**

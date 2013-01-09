@@ -67,8 +67,8 @@ class LoginSuccess implements AuthenticationSuccessHandlerInterface
 	)
 	{
 	    $this->container = $container;
-		$this->doctrine  = $doctrine;
-		$this->router    = $router;
+	    $this->doctrine  = $doctrine;
+	    $this->router    = $router;
 	}
 
     /**
@@ -85,18 +85,25 @@ class LoginSuccess implements AuthenticationSuccessHandlerInterface
      * @param  Symfony\Component\Security\Http\Event\InteractiveLoginEvent $event
      * @return boolean | Symfony\Component\HttpFoundation\RedirectResponse
      */
-	public function onAuthenticationSuccess(
-	    Request $request, TokenInterface $token
-	)
+     public function onAuthenticationSuccess(
+        Request $request, TokenInterface $token
+    )
     {
-		$response = null;
-		$session  = $request->getSession();
-		$user     = $token->getUser();
+        $response = null;
+        $session  = $request->getSession();
+        $user     = $token->getUser();
 
-		$hash = $this
-			->doctrine
-			->getRepository('TheJobPostAPIBundle:Hash')
-			->findOneById($request->request->get('hash'));
+        $referer = parse_url($request->headers->get('referer'));
+
+        $hash = $this
+            ->doctrine
+            ->getRepository(
+                $this->container->getParameter('api_hash_repository')
+            )
+            ->getByIdAndAppDomain(
+                $request->request->get('hash'),
+                $referer['host']
+            );
 
         foreach ($this->container->getParameter('api_roles') as $role)
         {
@@ -108,35 +115,36 @@ class LoginSuccess implements AuthenticationSuccessHandlerInterface
             }
         }
 
-		if (is_null($hash) || is_null($response))
-		{
-			$session->invalidate();
+        if (is_null($hash) || is_null($response))
+        {
+            $session->invalidate();
 
-			return new RedirectResponse(
-			    $this->router->generate(
-			        $this->container->getParameter('api_redirect')
-			    )
-			);
-		}
+            return new RedirectResponse(
+                $this->router->generate(
+                    $this->container->getParameter('api_redirect')
+                )
+            );
+        }
 
-		$user->updateLastLogin();
-		$user->updateNumberOfLogins();
+        $user->updateLastLogin();
+        $user->updateNumberOfLogins();
 
         $tokenEntity = $this
             ->doctrine
-			->getRepository(
-			    $this->container->getParameter('api_token_repository')
-			)
-			->create();
-		$tokenEntity->setApp($hash->getApp());
-		$tokenEntity->setUser($user);
+            ->getRepository(
+                $this->container->getParameter('api_token_repository')
+            )
+            ->create();
 
-		$manager = $this->doctrine->getEntityManager();
-		$manager->persist($tokenEntity);
-		$manager->remove($hash);
-		$manager->flush();
+        $tokenEntity->setApp($hash->getApp());
+        $tokenEntity->setUser($user);
 
-		$session->set('access_token', $tokenEntity->getId());
+        $manager = $this->doctrine->getEntityManager();
+        $manager->persist($tokenEntity);
+        $manager->remove($hash);
+        $manager->flush();
+
+        $session->set('access_token', $tokenEntity->getId());
 
         return $response;
     }
