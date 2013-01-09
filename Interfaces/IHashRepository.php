@@ -37,7 +37,7 @@ interface IHashRepository
      * @param  string $domain
      * @return TeaAndCode\APIBundle\Interfaces\IHash
      */
-    public function getByIdAndAppDomain($id, $domain)
+    public function getByIdAndAppDomain($id, $domain);
 
     /**
      * Clear expired Hash Entities
