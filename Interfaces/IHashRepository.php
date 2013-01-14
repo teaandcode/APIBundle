@@ -27,7 +27,7 @@ interface IHashRepository
      * @access public
      * @return TeaAndCode\APIBundle\Interfaces\IHash
      */
-    public function create();
+    public static function create();
 
     /**
      * Create Hash Entity

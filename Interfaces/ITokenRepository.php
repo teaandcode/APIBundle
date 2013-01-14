@@ -27,7 +27,7 @@ interface ITokenRepository
      * @access public
      * @return TeaAndCode\APIBundle\Interfaces\IToken
      */
-    public function create();
+    public static function create();
 
     /**
      * Clear expired Token Entities
