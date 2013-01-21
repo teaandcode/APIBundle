@@ -29,21 +29,22 @@ class Request
      */
     private $parameters;
 
+    public function __construct(array $parameters = array())
+    {
+        $this->parameters = $parameters;
+    }
+
     /**
      * Set parameters from request
      * 
      * @access public
      * @param  array $parameters
      */
-    public function setParameters($parameters)
+    public function setParameters(array $parameters)
     {
         if (is_array($parameters))
         {
             $this->parameters = $parameters;
-        }
-        else
-        {
-            $this->parameters = array();
         }
     }
 
@@ -108,6 +109,23 @@ class Request
             }
 
             return $this->parameters[$name];
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if single parameter is set
+     * 
+     * @access public
+     * @param  string $name
+     * @return boolean
+     */
+    public function isParameterSet($name)
+    {
+        if (isset($this->parameters[$name]))
+        {
+            return true;
         }
 
         return false;

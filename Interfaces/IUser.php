@@ -16,7 +16,7 @@ namespace TeaAndCode\APIBundle\Interfaces;
 use Symfony\Component\Security\Core\User\AdvancedUserInterface;
 
 /**
- * TeaAndCode\APIBundle\Interface\IUser
+ * TeaAndCode\APIBundle\Interfaces\IUser
  * 
  * @package    TeaAndCodeAPIBundle
  * @subpackage Interface
@@ -97,7 +97,7 @@ interface IUser extends AdvancedUserInterface, \Serializable
      * Add role
      *
      * @access public
-     * @param  TheJobPost\APIBundle\Entity\Role $role
+     * @param  TeaAndCode\APIBundle\Interfaces\IRole $role
      */
     public function addRole(IRole $role);
 
@@ -105,7 +105,7 @@ interface IUser extends AdvancedUserInterface, \Serializable
      * Add token
      *
      * @access public
-     * @param  TheJobPost\APIBundle\Entity\Token $token
+     * @param  TeaAndCode\APIBundle\Interfaces\IToken $token
      */
     public function addToken(IToken $token);
 

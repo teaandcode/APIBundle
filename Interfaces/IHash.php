@@ -42,7 +42,7 @@ interface IHash
      * Set app
      * 
      * @access public
-     * @param  TeaAndCode\APIBundle\Interface\IApp $app
+     * @param  TeaAndCode\APIBundle\Interfaces\IApp $app
      */
     public function setApp(IApp $app);
 
@@ -50,7 +50,7 @@ interface IHash
      * Get app
      * 
      * @access public
-     * @return TheJobPost\APIBundle\Entity\App
+     * @return TeaAndCode\APIBundle\Interfaces\IApp
      */
     public function getApp();
 

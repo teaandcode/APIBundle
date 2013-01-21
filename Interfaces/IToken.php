@@ -16,7 +16,7 @@ namespace TeaAndCode\APIBundle\Interfaces;
 use Symfony\Component\Security\Core\User\AdvancedUserInterface;
 
 /**
- * TeaAndCode\APIBundle\Interface\IToken
+ * TeaAndCode\APIBundle\Interfaces\IToken
  * 
  * @package    TeaAndCodeAPIBundle
  * @subpackage Interface

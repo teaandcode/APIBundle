@@ -61,9 +61,9 @@ class PersistListener
      */
 	public function postPersist(LifecycleEventArgs $args)
     {
-        $entity  = $args->getEntity();
+        $entity = $args->getEntity();
 
-        $hash  = $this
+        $hash = $this
             ->doctrine
             ->getRepository(
                 $this->container->getParameter('api_hash_repository')

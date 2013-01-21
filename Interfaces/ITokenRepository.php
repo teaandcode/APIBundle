@@ -25,9 +25,11 @@ interface ITokenRepository
      * Create Token Entity
      * 
      * @access public
+     * @param  array $fields
+     * @param  Doctrine\ORM\EntityManager $manager
      * @return TeaAndCode\APIBundle\Interfaces\IToken
      */
-    public function create();
+    public static function create(array $fields = array(), $manager = null);
 
     /**
      * Clear expired Token Entities
