@@ -100,12 +100,9 @@ class Request
                 }
             }
 
-            if (is_string($this->parameters[$name]))
+            if (empty($this->parameters[$name]))
             {
-                if (strlen($this->parameters[$name]) == 0)
-                {
-                    return false;
-                }
+                return false;
             }
 
             return $this->parameters[$name];
