@@ -34,6 +34,7 @@ abstract class APIController extends Controller
     const ERR_OK = 0;
 
     const ERR_METHOD_NOT_FOUND = 9000;
+    const ERR_BAD_CREDENTIALS  = 9001;
 
     /**
      * Stores current error code
@@ -72,7 +73,9 @@ abstract class APIController extends Controller
         $this->messages = array(
             self::ERR_OK => 'OK',
             self::ERR_METHOD_NOT_FOUND =>
-                'The requested method could not be found'
+                'The requested method could not be found',
+            self::ERR_BAD_CREDENTIALS  =>
+                'You are not authorized to access this service'
         );
 
         $this->serializer = new Serializer(
@@ -113,7 +116,9 @@ abstract class APIController extends Controller
 
         if (count($parameters) == 0)
         {
-            return $this->sendResponse(self::ERR_METHOD_NOT_FOUND);
+            $this->err = self::ERR_METHOD_NOT_FOUND;
+
+            return $this->sendResponse();
         }
 
         $function = str_replace('-', ' ', $parameters[0]);
@@ -126,7 +131,9 @@ abstract class APIController extends Controller
 
         if (!method_exists($this, $function))
         {
-            return $this->sendResponse(self::ERR_METHOD_NOT_FOUND);
+            $this->err = self::ERR_METHOD_NOT_FOUND;
+
+            return $this->sendResponse();
         }
 
         $requestClass  = 'TeaAndCode\\APIBundle\\Object\\Request';
@@ -223,6 +230,57 @@ abstract class APIController extends Controller
     }
 
     /**
+     * Checks that user is fully authenticated or secured flag is true
+     * 
+     * @access protected
+     * @param  boolean $secured
+     * @return boolean
+     */
+    protected function methodSecured($secured)
+    {
+        $authenticated = $this
+            ->get('security.context')
+            ->isGranted('IS_AUTHENTICATED_FULLY');
+
+        if (!$authenticated && !$secured)
+        {
+            $this->err = self::ERR_BAD_CREDENTIALS;
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Removes underscored (private) keys from array before sending out to the
+     * output buffer
+     * 
+     * @access private
+     * @param  mixed $data
+     * @return mixed
+     */
+    private function removeUnderscores($data)
+    {
+        if (is_array($data))
+        {
+            foreach ($data as $key => $value)
+            {
+                if (substr($key, 0, 1) == '_')
+                {
+                    unset($data[$key]);
+                }
+                elseif (is_array($value))
+                {
+                    $data[$key] = $this->removeUnderscores($value);
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    /**
      * Takes error code and data to form a standard serialised response array
      * 
      * @access private
@@ -239,7 +297,7 @@ abstract class APIController extends Controller
                         'code' => $this->err,
                         'message' => $this->messages[$this->err]
                     ),
-                    'data' => $data
+                    'data' => $this->removeUnderscores($data)
                 ),
                 $this->getRequest()->getRequestFormat()
             ),
