@@ -236,7 +236,7 @@ abstract class APIController extends Controller
      * @param  boolean $secured
      * @return boolean
      */
-    protected function methodSecured($secured)
+    protected function isMethodSecured($secured)
     {
         $authenticated = $this
             ->get('security.context')
