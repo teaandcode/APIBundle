@@ -32,9 +32,7 @@ use Symfony\Component\Serializer\Serializer;
 abstract class APIController extends Controller
 {
     const ERR_OK = 0;
-
     const ERR_METHOD_NOT_FOUND = 9000;
-    const ERR_BAD_CREDENTIALS  = 9001;
 
     /**
      * Stores current error code
@@ -73,9 +71,7 @@ abstract class APIController extends Controller
         $this->messages = array(
             self::ERR_OK => 'OK',
             self::ERR_METHOD_NOT_FOUND =>
-                'The requested method could not be found',
-            self::ERR_BAD_CREDENTIALS  =>
-                'You are not authorized to access this service'
+                'The requested method could not be found'
         );
 
         $this->serializer = new Serializer(
@@ -233,29 +229,6 @@ abstract class APIController extends Controller
     public function getError()
     {
         return new \RuntimeException($this->messages[$this->err], $this->err);
-    }
-
-    /**
-     * Checks that user is fully authenticated or secured flag is true
-     * 
-     * @access protected
-     * @param  boolean $secured
-     * @return boolean
-     */
-    protected function isMethodSecured($secured)
-    {
-        $authenticated = $this
-            ->get('security.context')
-            ->isGranted('IS_AUTHENTICATED_FULLY');
-
-        if (!$authenticated && !$secured)
-        {
-            $this->err = self::ERR_BAD_CREDENTIALS;
-
-            return false;
-        }
-
-        return true;
     }
 
     /**
