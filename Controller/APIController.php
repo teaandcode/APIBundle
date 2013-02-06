@@ -158,7 +158,7 @@ abstract class APIController extends Controller
 
             foreach ($parameters as $name => $value)
             {
-                if ($requestObject->isParameterSet($name))
+                if (!$requestObject->isParameterSet($name))
                 {
                     $requestObject->setParameter($name, $value);
                 }
@@ -171,7 +171,7 @@ abstract class APIController extends Controller
 
         foreach ($route as $name => $value)
         {
-            if ($requestObject->isParameterSet($name))
+            if (!$requestObject->isParameterSet($name))
             {
                 $requestObject->setParameter($name, $value);
             }
