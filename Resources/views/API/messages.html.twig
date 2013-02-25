@@ -1,2 +1,2 @@
-{# src/TheJobPost/APIBundle/Resources/views/API/messages.html.twig #}
+{# vendor/tea-and-code/api-bundle/TeaAndCode/APIBundle/Resources/views/API/messages.html.twig #}
 {% for code,message in messages %}{% if (code > 0) and (code < 9000) %}<input type="hidden" id="_message_{{ code }}" name="_messages[{{ code }}]" value="{{ message|trans }}" />{% endif %}{% endfor %}

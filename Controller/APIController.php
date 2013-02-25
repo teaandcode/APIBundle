@@ -175,7 +175,7 @@ abstract class APIController extends Controller
 
         $accessToken = $request->getSession()->get('access_token');
 
-        if ($requestObject->getParameter('access_token'))
+        if ($requestObject->isParameterSet('access_token'))
         {
             $accessToken = $requestObject->getParameter('access_token');
         }
