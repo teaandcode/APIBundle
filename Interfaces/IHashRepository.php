@@ -1,50 +1,42 @@
 <?php
 /**
  * Tea and Code API Bundle IHashRepository Interface
- * 
+ *
  * PHP version 5
- * 
- * @category Interface
- * @package  TeaAndCodeAPIBundle
- * @author   Dave Nash <dave.nash@teaandcode.com>
- * @license  Apache License, Version 2.0
- * @link     http://www.teaandcode.com
+ *
+ * @package TeaAndCode\APIBundle\Interfaces
+ * @author  Dave Nash <dave.nash@teaandcode.com>
+ * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
+ * @version GIT: $Id$
+ * @link    http://www.teaandcode.com/symfony-2/api-bundle APIBundle Docs
  */
 
 namespace TeaAndCode\APIBundle\Interfaces;
 
 /**
- * TeaAndCode\APIBundle\Interfaces\IHashRepository
+ * This interface specifies the HashRepository entity methods
  *
- * @package    TeaAndCodeAPIBundle
- * @subpackage Interface
+ * @package TeaAndCode\APIBundle\Interfaces\IHashRepository
+ * @author  Dave Nash <dave.nash@teaandcode.com>
+ * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
+ * @version Release: @package_version@
+ * @link    http://www.teaandcode.com/symfony-2/api-bundle APIBundle Docs
  */
 interface IHashRepository
 {
     /**
      * Create Hash Entity
-     * 
+     *
      * @access public
-     * @param  array $fields
-     * @param  Doctrine\ORM\EntityManager $manager
      * @return TeaAndCode\APIBundle\Interfaces\IHash
      */
-    public static function create(array $fields = array(), $manager = null);
-
-    /**
-     * Get Hash Entity by hash id and app domain
-     * 
-     * @access public
-     * @param  integer $id
-     * @param  string $domain
-     * @return TeaAndCode\APIBundle\Interfaces\IHash
-     */
-    public function getByIdAndAppDomain($id, $domain);
+    public static function create();
 
     /**
      * Clear expired Hash Entities
-     * 
+     *
      * @access public
+     * @return void
      */
     public function removeExpired();
 }

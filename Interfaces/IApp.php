@@ -3,153 +3,168 @@
  * Tea and Code API Bundle IApp Interface
  *
  * PHP version 5
- * 
- * @category Interface
- * @package  TeaAndCodeAPIBundle
- * @author   Dave Nash <dave.nash@teaandcode.com>
- * @license  Apache License, Version 2.0
- * @link     http://www.teaandcode.com
+ *
+ * @package TeaAndCode\APIBundle\Interfaces
+ * @author  Dave Nash <dave.nash@teaandcode.com>
+ * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
+ * @version GIT: $Id$
+ * @link    http://www.teaandcode.com/symfony-2/api-bundle APIBundle Docs
  */
 
 namespace TeaAndCode\APIBundle\Interfaces;
 
 /**
- * TeaAndCode\APIBundle\Interfaces\IApp
+ * This interface specifies the App entity methods
  *
- * @package    TeaAndCodeAPIBundle
- * @subpackage Interface
+ * @package TeaAndCode\APIBundle\Interfaces\IApp
+ * @author  Dave Nash <dave.nash@teaandcode.com>
+ * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
+ * @version Release: @package_version@
+ * @link    http://www.teaandcode.com/symfony-2/api-bundle APIBundle Docs
  */
 interface IApp
 {
     /**
      * Get id
-     * 
+     *
      * @access public
-     * @return integer 
+     * @return integer
      */
     public function getId();
 
     /**
      * Set name
-     * 
+     *
+     * @param string $name Set string value as app name
+     *
      * @access public
-     * @param  string $name
+     * @return void
      */
     public function setName($name);
 
     /**
      * Get name
-     * 
+     *
      * @access public
-     * @return string 
+     * @return string
      */
     public function getName();
 
     /**
      * Set appId
-     * 
+     *
+     * @param string $appId Set string value as app id
+     *
      * @access public
+     * @return void
      */
     public function setAppId($appId);
 
     /**
      * Get appId
-     * 
+     *
      * @access public
-     * @return string 
+     * @return string
      */
     public function getAppId();
 
     /**
-     * Set appSecret
-     * 
+     * Set appDomain
+     *
+     * @param string $appDomain Set string value as app domain
+     *
      * @access public
+     * @return void
+     */
+    public function setAppDomain($appDomain);
+
+    /**
+     * Get appDomain
+     *
+     * @access public
+     * @return string
+     */
+    public function getAppDomain();
+
+    /**
+     * Set appSecret
+     *
+     * @param string $appSecret Set string value as app secret
+     *
+     * @access public
+     * @return void
      */
     public function setAppSecret($appSecret);
 
     /**
      * Get appSecret
-     * 
+     *
      * @access public
-     * @return string 
+     * @return string
      */
     public function getAppSecret();
 
     /**
-     * Set domain
-     * 
+     * Set trusted
+     *
+     * @param bool $trusted Set boolean value to say whether app is trusted
+     *
      * @access public
-     * @param  string $domain
+     * @return void
      */
-    public function setDomain($domain);
+    public function setTrusted($trusted);
 
     /**
-     * Get domain
-     * 
+     * Get trusted
+     *
      * @access public
-     * @return string 
+     * @return bool
      */
-    public function getDomain();
+    public function getTrusted();
 
     /**
-     * Add hash
-     * 
+     * Add admin
+     *
+     * @param IUser $admin Add IUser object as app admin
+     *
      * @access public
-     * @param  TeaAndCode\APIBundle\Interfaces\IHash $hash
+     * @return void
      */
-    public function addHash(IHash $hash);
+    public function addAdmin(IUser $admin);
 
     /**
-     * Get hashes
-     * 
+     * Remove admin
+     *
+     * @param IUser $admin Remove IUser object as app admin
+     *
      * @access public
-     * @return Doctrine\Common\Collections\ArrayCollection 
+     * @return void
      */
-    public function getHashes();
+    public function removeAdmin(IUser $admin);
+
+    /**
+     * Get admins
+     *
+     * @access public
+     * @return Doctrine\Common\Collections\ArrayCollection
+     */
+    public function getAdmins();
 
     /**
      * Add token
-     * 
+     *
+     * @param IToken $token Add IToken object as app token
+     *
      * @access public
-     * @param  TeaAndCode\APIBundle\Interfaces\IToken $token
+     * @return void
      */
     public function addToken(IToken $token);
 
     /**
      * Get tokens
-     * 
+     *
      * @access public
-     * @return Doctrine\Common\Collections\ArrayCollection 
+     * @return Doctrine\Common\Collections\ArrayCollection
      */
     public function getTokens();
-
-    /**
-     * Set created
-     * 
-     * @access public
-     */
-    public function setCreated();
-
-    /**
-     * Get created
-     * 
-     * @access public
-     * @return DateTime 
-     */
-    public function getCreated();
-
-    /**
-     * Set updated
-     * 
-     * @access public
-     */
-    public function setUpdated();
-
-    /**
-     * Get updated
-     * 
-     * @access public
-     * @return DateTime 
-     */
-    public function getUpdated();
 }

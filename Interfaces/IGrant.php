@@ -1,6 +1,6 @@
 <?php
 /**
- * Tea and Code API Bundle IToken Interface
+ * Tea and Code API Bundle IGrant Interface
  *
  * PHP version 5
  *
@@ -16,24 +16,16 @@ namespace TeaAndCode\APIBundle\Interfaces;
 use Symfony\Component\Security\Core\User\AdvancedUserInterface;
 
 /**
- * This interface specifies the Token entity methods
+ * This interface specifies the Grant entity methods
  *
- * @package TeaAndCode\APIBundle\Interfaces\IToken
+ * @package TeaAndCode\APIBundle\Interfaces\IGrant
  * @author  Dave Nash <dave.nash@teaandcode.com>
  * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
  * @version Release: @package_version@
  * @link    http://www.teaandcode.com/symfony-2/api-bundle APIBundle Docs
  */
-interface IToken
+interface IGrant
 {
-    /**
-     * Set id
-     *
-     * @access public
-     * @return void
-     */
-    public function setId();
-
     /**
      * Get id
      *
@@ -45,7 +37,7 @@ interface IToken
     /**
      * Set app
      *
-     * @param IApp $app Set IApp object as token app
+     * @param IApp $app Set IApp object as grant app
      *
      * @access public
      * @return void
@@ -63,7 +55,7 @@ interface IToken
     /**
      * Set user
      *
-     * @param IUser $user Set IUser object as token user
+     * @param IUser $user Set IUser object as grant user
      *
      * @access public
      * @return void
@@ -79,18 +71,20 @@ interface IToken
     public function getUser();
 
     /**
-     * Set expires
+     * Set permissions
+     *
+     * @param array $permissions Set permissions array as grant permissions
      *
      * @access public
      * @return void
      */
-    public function setExpires();
+    public function setPermissions(array $permissions);
 
     /**
-     * Get expires
+     * Get permissions
      *
      * @access public
-     * @return DateTime
+     * @return array
      */
-    public function getExpires();
+    public function getPermissions();
 }

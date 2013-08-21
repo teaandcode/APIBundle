@@ -3,13 +3,12 @@
  * Tea and Code API Bundle Controller
  *
  * PHP version 5
- * 
- * @category Controller
- * @package  TeaAndCodeAPIBundle
- * @version  1.0
- * @author   Dave Nash <dave.nash@teaandcode.com>
- * @license  Apache License, Version 2.0
- * @link     http://www.teaandcode.com
+ *
+ * @package TeaAndCode\APIBundle\Controller
+ * @author  Dave Nash <dave.nash@teaandcode.com>
+ * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
+ * @version GIT: $Id$
+ * @link    http://www.teaandcode.com/symfony-2/api-bundle APIBundle Docs
  */
 
 namespace TeaAndCode\APIBundle\Controller;
@@ -26,17 +25,22 @@ use Symfony\Component\Serializer\Serializer;
 /**
  * TeaAndCode\APIBundle\Controller\APIController
  *
- * @package    TeaAndCodeAPIBundle
- * @subpackage Controller
+ * @package TeaAndCode\APIBundle\Controller\APIController
+ * @author  Dave Nash <dave.nash@teaandcode.com>
+ * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License 2.0
+ * @version Release: @package_version@
+ * @link    http://www.teaandcode.com/symfony-2/api-bundle APIBundle Docs
  */
 abstract class APIController extends Controller
 {
     const ERR_OK = 0;
-    const ERR_METHOD_NOT_FOUND = 9000;
+    const ERR_APP_ID_NOT_SET   = 9000;
+    const ERR_APP_NOT_FOUND    = 9001;
+    const ERR_METHOD_NOT_FOUND = 9002;
 
     /**
      * Stores current error code
-     * 
+     *
      * @access protected
      * @var    integer $err
      */
@@ -44,15 +48,23 @@ abstract class APIController extends Controller
 
     /**
      * Stores error messages associated with constants
-     * 
+     *
      * @access protected
      * @var    array $messages
      */
     protected $messages;
 
     /**
+     * Symfony Request object
+     *
+     * @access protected
+     * @var    Symfony\Component\HttpFoundation\Request $request
+     */
+    protected $request;
+
+    /**
      * Serializer used to serialize and unserialize data into/from JSON or XML
-     * 
+     *
      * @access protected
      * @var    Symfony\Component\Serializer\Serializer $serializer
      */
@@ -60,18 +72,19 @@ abstract class APIController extends Controller
 
     /**
      * Pre-fills messages array and sets-up the JSON/XML serializer
-     * 
+     *
      * @access public
      * @return TeaAndCode\APIBundle\Controller\APIController
      */
     public function __construct()
     {
-        $this->err = self::ERR_OK;
+        $this->err = static::ERR_OK;
 
         $this->messages = array(
-            self::ERR_OK => 'OK',
-            self::ERR_METHOD_NOT_FOUND =>
-                'The requested method could not be found'
+            static::ERR_OK => 'OK',
+            static::ERR_APP_ID_NOT_SET   => 'The app_id is not set',
+            static::ERR_APP_NOT_FOUND    => 'No app entity was found',
+            static::ERR_METHOD_NOT_FOUND => 'The method could not be found'
         );
 
         $this->serializer = new Serializer(
@@ -87,47 +100,46 @@ abstract class APIController extends Controller
 
     /**
      * Handles API request
-     * 
-     * 1. Reads the path to find the method adjective (i.e. User)
-     * 2. Reads the method to find the method verb (i.e. get)
-     * 3. Adds api to beginning of method (i.e. apiGetUser)
-     * 4. Checks method exists
-     * 5. Reads serialised request data into Request object
-     * 6. Reads both query and path data into Request object
-     * 7. Obtains user object from access_token if available
-     * 8. Adds the user object to the security context
-     * 9. Runs function and sends error code and data as serialised Response
-     * 
+     *
+     * @param Request $request Symfony Request object
+     * @param string  $_prefix API URL prefix
+     *
      * @access public
-     * @param  Symfony\Component\HttpFoundation\Request $request
-     * @param  string $_prefix
      * @return Symfony\Component\HttpFoundation\Response
      */
-    public function processAction(Request $request, $_prefix)
+    public function processAction(Request $request, $_prefix = '')
     {
-        $path = str_replace($_prefix, '', $request->getPathInfo());
+        $this->request = $request;
+
+        // Reads the path to find the object (i.e. User)
+        $path = str_replace($_prefix, '', $this->request->getPathInfo());
         $path = trim($path, '/');
 
         $parameters = explode('/', $path);
 
         if (count($parameters) == 0)
         {
-            $this->err = self::ERR_METHOD_NOT_FOUND;
+            $this->err = static::ERR_METHOD_NOT_FOUND;
 
             return $this->sendResponse();
         }
 
-        $function = str_replace('-', ' ', $parameters[0]);
-        $function = ucwords($function);
-        $function = str_replace(' ', '', $function);
-        $function = ucfirst(strtolower($request->getMethod())) . $function;
-        $function = 'api' . $function;
+        $object = str_replace('-', ' ', $parameters[0]);
+        $object = ucwords($object);
+        $object = str_replace(' ', '', $object);
+
+        // Reads the method to find the action (i.e. get)
+        $action = ucfirst(strtolower($this->request->getMethod()));
+
+        // Adds api to the beginning to form the name of the function
+        $function = 'api' . $action . $function;
 
         unset($parameters);
 
+        // Checks the method exists
         if (!method_exists($this, $function))
         {
-            $this->err = self::ERR_METHOD_NOT_FOUND;
+            $this->err = static::ERR_METHOD_NOT_FOUND;
 
             return $this->sendResponse();
         }
@@ -135,18 +147,20 @@ abstract class APIController extends Controller
         $requestClass  = 'TeaAndCode\\APIBundle\\Object\\Request';
         $requestObject = new $requestClass();
 
-	    $content = $request->getContent();
+        $content = $this->request->getContent();
 
+        // Reads serialised request data into Request object
         if (strlen($content) > 0)
         {
             $requestObject = $this->serializer->deserialize(
-    			$content,
-    			$requestClass,
-    			$request->getRequestFormat()
-    		);
-	    }
+                $content,
+                $requestClass,
+                $this->request->getRequestFormat()
+            );
+        }
 
-        $query = $request->getQueryString();
+        // Reads both query and path data into Request object
+        $query = $this->request->getQueryString();
 
         if (strlen($query) > 0)
         {
@@ -163,7 +177,7 @@ abstract class APIController extends Controller
 
         $route = $this
             ->get('router')
-            ->match($request->getPathInfo());
+            ->match($this->request->getPathInfo());
 
         foreach ($route as $name => $value)
         {
@@ -173,7 +187,8 @@ abstract class APIController extends Controller
             }
         }
 
-        $accessToken = $request->getSession()->get('access_token');
+        // Obtains user object from access_token if available
+        $accessToken = $this->request->getSession()->get('access_token');
 
         if ($requestObject->isParameterSet('access_token'))
         {
@@ -191,6 +206,7 @@ abstract class APIController extends Controller
         {
             $user = $token->getUser();
 
+            // Adds the user object to the security context
             $this->get('security.context')->setToken(
                 new UsernamePasswordToken(
                     $user,
@@ -201,12 +217,13 @@ abstract class APIController extends Controller
             );
         }
 
+        // Returns sendResponse parsed output from function
         return $this->sendResponse($this->$function($requestObject));
     }
 
     /**
      * Returns error messages
-     * 
+     *
      * @access public
      * @return array
      */
@@ -217,12 +234,12 @@ abstract class APIController extends Controller
             array(
                 'messages' => $this->messages
             )
-		);
+        );
     }
 
     /**
      * Returns current error as a RuntimeException
-     * 
+     *
      * @access public
      * @return RuntimeException
      */
@@ -232,14 +249,45 @@ abstract class APIController extends Controller
     }
 
     /**
+     * Takes error code and data to form a standard serialised response array
+     *
+     * @param array $data Data returned from API method as an array
+     *
+     * @access protected
+     * @return Symfony\Component\HttpFoundation\Response
+     */
+    protected function sendResponse($data = null)
+    {
+        return new Response(
+            $this->serializer->serialize(
+                array(
+                    'error' => array(
+                        'code' => $this->err,
+                        'message' => $this->messages[$this->err]
+                    ),
+                    'data' => $this->_removeUnderscores($data)
+                ),
+                $this->request->getRequestFormat()
+            ),
+            200,
+            array(
+                'Access-Control-Allow-Origin' => '*',
+                'Content-Type'                => 'text/html',
+                'HTTP/1.1 200 OK'             => ''
+            )
+        );
+    }
+
+    /**
      * Removes underscored (private) keys from array before sending out to the
      * output buffer
-     * 
+     *
+     * @param mixed $data Data returned from API method as an array
+     *
      * @access private
-     * @param  mixed $data
      * @return mixed
      */
-    private function removeUnderscores($data)
+    private function _removeUnderscores($data)
     {
         if (is_array($data))
         {
@@ -251,37 +299,11 @@ abstract class APIController extends Controller
                 }
                 elseif (is_array($value))
                 {
-                    $data[$key] = $this->removeUnderscores($value);
+                    $data[$key] = $this->_removeUnderscores($value);
                 }
             }
         }
 
         return $data;
-    }
-
-    /**
-     * Takes error code and data to form a standard serialised response array
-     * 
-     * @access private
-     * @param  integer $err
-     * @param  array $data
-     * @return Symfony\Component\HttpFoundation\Response
-     */
-    private function sendResponse($data)
-    {
-        return new Response(
-            $this->serializer->serialize(
-                array(
-                    'error' => array(
-                        'code' => $this->err,
-                        'message' => $this->messages[$this->err]
-                    ),
-                    'data' => $this->removeUnderscores($data)
-                ),
-                $this->getRequest()->getRequestFormat()
-            ),
-            200,
-            array('Content-Type' => 'text/html')
-        );
     }
 }
