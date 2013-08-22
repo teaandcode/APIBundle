@@ -67,11 +67,6 @@ class TeaAndCodeAPIExtension extends Extension
         );
 
         $container->setParameter(
-            'api_host',
-            $config['host']
-        );
-
-        $container->setParameter(
             'api_login_dialog_path',
             $config['login_dialog']['path']
         );

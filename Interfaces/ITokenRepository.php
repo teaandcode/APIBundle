@@ -27,13 +27,10 @@ interface ITokenRepository
     /**
      * Create Token Entity
      *
-     * @param array         $fields  Array of fields to be set
-     * @param EntityManager $manager Symfony's entity manager
-     *
      * @access public
      * @return TeaAndCode\APIBundle\Interfaces\IToken
      */
-    public static function create(array $fields = array(), $manager = null);
+    public static function create();
 
     /**
      * Clear expired Token Entities

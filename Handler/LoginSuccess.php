@@ -100,7 +100,7 @@ class LoginSuccess implements AuthenticationSuccessHandlerInterface
     )
     {
         $app     = null;
-        $current = parse_url($this->container->getParameter('api_host'));
+        $current = parse_url($request->getUri());
         $hash    = $request->request->get('hash');
         $referer = parse_url($request->headers->get('referer'));
         $role    = null;
@@ -194,9 +194,10 @@ class LoginSuccess implements AuthenticationSuccessHandlerInterface
 
         if (!is_null($redirectUri))
         {
-            $redirect = parse_url($redirectUri);
+            $redirect = urldecode($redirectUri);
+            $redirect = parse_url($redirect);
 
-            if ($redirect !== false)
+            if (isset($redirect['host']))
             {
                 $url = $redirect['scheme'] . '://';
 

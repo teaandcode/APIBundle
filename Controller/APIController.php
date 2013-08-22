@@ -34,9 +34,10 @@ use Symfony\Component\Serializer\Serializer;
 abstract class APIController extends Controller
 {
     const ERR_OK = 0;
-    const ERR_APP_ID_NOT_SET   = 9000;
-    const ERR_APP_NOT_FOUND    = 9001;
-    const ERR_METHOD_NOT_FOUND = 9002;
+    const ERR_APP_ID_NOT_SET    = 9000;
+    const ERR_APP_NOT_FOUND     = 9001;
+    const ERR_METHOD_NOT_FOUND  = 9002;
+    const ERR_REDIRECT_MISMATCH = 9003;
 
     /**
      * Stores current error code
@@ -82,9 +83,11 @@ abstract class APIController extends Controller
 
         $this->messages = array(
             static::ERR_OK => 'OK',
-            static::ERR_APP_ID_NOT_SET   => 'The app_id is not set',
-            static::ERR_APP_NOT_FOUND    => 'No app entity was found',
-            static::ERR_METHOD_NOT_FOUND => 'The method could not be found'
+            static::ERR_APP_ID_NOT_SET    => 'The app_id is not set',
+            static::ERR_APP_NOT_FOUND     => 'No app entity was found',
+            static::ERR_METHOD_NOT_FOUND  => 'The method could not be found',
+            static::ERR_REDIRECT_MISMATCH => 'The redirect uri does not ' .
+                                             'match the app domain'
         );
 
         $this->serializer = new Serializer(
@@ -258,6 +261,17 @@ abstract class APIController extends Controller
      */
     protected function sendResponse($data = null)
     {
+        $code  = 200;
+        $text  = 'OK';
+        $value = '';
+
+        if ($this->err != static::ERR_OK)
+        {
+            $code  = 400;
+            $text  = 'Bad Request';
+            $value = null;
+        }
+
         return new Response(
             $this->serializer->serialize(
                 array(
@@ -269,11 +283,11 @@ abstract class APIController extends Controller
                 ),
                 $this->request->getRequestFormat()
             ),
-            200,
+            $code,
             array(
-                'Access-Control-Allow-Origin' => '*',
-                'Content-Type'                => 'text/html',
-                'HTTP/1.1 200 OK'             => ''
+                'HTTP/1.1 ' . $code . ' ' . $text => $value,
+                'Access-Control-Allow-Origin'     => '*',
+                'Content-Type'                    => 'text/html'
             )
         );
     }
