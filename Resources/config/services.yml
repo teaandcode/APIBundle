@@ -13,6 +13,13 @@ services:
             - { name: doctrine.event_listener, event: postPersist }
         
     
+    tea_and_code.api_bundle.handler.login_failure:
+        class:     TeaAndCode\APIBundle\Handler\LoginFailure
+        arguments: [ @doctrine, @router, @service_container ]
+        tags:
+            - { name: monolog.logger, event: security }
+        
+    
     tea_and_code.api_bundle.handler.login_success:
         class:     TeaAndCode\APIBundle\Handler\LoginSuccess
         arguments: [ @doctrine, @router, @service_container ]

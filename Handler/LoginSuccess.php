@@ -17,13 +17,18 @@ use Doctrine\Bundle\DoctrineBundle\Registry as Doctrine;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Router;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Http\Authentication;
-use Symfony\Component\Security\Core\Authentication\Token;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Encoder\XmlEncoder;
+use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
+use Symfony\Component\Serializer\Serializer;
 
 /**
- * This class runs on successful login
+ * This class runs on login success
  *
  * @package TeaAndCode\APIBundle\Handler\LoginSuccess
  * @author  Dave Nash <dave.nash@teaandcode.com>
@@ -31,7 +36,8 @@ use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
  * @version Release: @package_version@
  * @link    http://www.teaandcode.com/symfony-2/api-bundle APIBundle Docs
  */
-class LoginSuccess implements AuthenticationSuccessHandlerInterface
+class LoginSuccess
+implements Authentication\AuthenticationSuccessHandlerInterface
 {
     /**
      * Stores container object
@@ -176,7 +182,7 @@ class LoginSuccess implements AuthenticationSuccessHandlerInterface
         $tokenEntity->setApp($app);
         $tokenEntity->setUser($user);
 
-        $manager = $this->doctrine->getEntityManager();
+        $manager = $this->doctrine->getManager();
         $manager->persist($tokenEntity);
         $manager->flush();
 

@@ -75,7 +75,7 @@ class KernelListener extends APIController
                 }
             }
 
-            parse_str($this->request->getQueryString(), $query);
+            $query = $this->request->query->all();
 
             if (!isset($query['app_id']))
             {
@@ -180,12 +180,12 @@ class KernelListener extends APIController
                     $redUri .= $redirect['host'];
                     $redUri .= $redirect['path'];
 
-                    if ($redirect['query'])
+                    if (isset($redirect['query']))
                     {
                         $redUri .= '?' . $redirect['query'];
                     }
 
-                    if ($redirect['fragment'])
+                    if (isset($redirect['fragment']))
                     {
                         $redUri .= '#' . $redirect['fragment'];
                     }
