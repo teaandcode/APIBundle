@@ -102,7 +102,11 @@ implements Authentication\AuthenticationFailureHandlerInterface
 
         if (is_null($hash))
         {
-            error_log('foo');
+            return new RedirectResponse(
+                $this
+                    ->router
+                    ->generate($this->container->getParameter('api_redirect'))
+            );
         }
 
         return new RedirectResponse(
