@@ -243,12 +243,19 @@ abstract class APIController extends Controller
     /**
      * Returns current error as a RuntimeException
      *
+     * @param integer $code Specific error code
+     *
      * @access public
      * @return RuntimeException
      */
-    public function getError()
+    public function getError($code = static::ERR_OK)
     {
-        return new \RuntimeException($this->messages[$this->err], $this->err);
+        if ($code == static::ERR_OK || !isset($this->messages[$code]))
+        {
+            $code = $this->err;
+        }
+
+        return new \RuntimeException($this->messages[$code], $code);
     }
 
     /**
