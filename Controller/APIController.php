@@ -248,9 +248,9 @@ abstract class APIController extends Controller
      * @access public
      * @return RuntimeException
      */
-    public function getError($code = static::ERR_OK)
+    public function getError($code = self::ERR_OK)
     {
-        if ($code == static::ERR_OK || !isset($this->messages[$code]))
+        if ($code == self::ERR_OK || !isset($this->messages[$code]))
         {
             $code = $this->err;
         }
