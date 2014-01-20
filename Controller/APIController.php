@@ -16,6 +16,7 @@ namespace TeaAndCode\APIBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
@@ -46,6 +47,14 @@ abstract class APIController extends Controller
      * @var    integer $err
      */
     protected $err;
+
+    /**
+     * ResponseHeaderBag
+     *
+     * @access protected
+     * @var    ResponseHeaderBag $headers
+     */
+    protected $headers;
 
     /**
      * Stores error messages associated with constants
@@ -81,6 +90,14 @@ abstract class APIController extends Controller
     {
         $this->err = static::ERR_OK;
 
+        $this->headers = new ResponseHeaderBag();
+        $this->headers->add(
+            array(
+                'Access-Control-Allow-Origin' => '*',
+                'Content-Type'                => 'text/html'
+            )
+        );
+
         $this->messages = array(
             static::ERR_OK => 'OK',
             static::ERR_APP_ID_NOT_SET    => 'The app_id is not set',
@@ -97,6 +114,51 @@ abstract class APIController extends Controller
             array(
                 'json' => new JsonEncoder(),
                 'xml'  => new XmlEncoder()
+            )
+        );
+    }
+
+    /**
+     * Returns current error as a RuntimeException
+     *
+     * @param integer $code Specific error code
+     *
+     * @access public
+     * @return RuntimeException
+     */
+    public function getError($code = self::ERR_OK)
+    {
+        if ($code == self::ERR_OK || !isset($this->messages[$code]))
+        {
+            $code = $this->err;
+        }
+
+        return new \RuntimeException($this->messages[$code], $code);
+    }
+
+    /**
+     * Returns ResponseHeaderBag
+     *
+     * @access public
+     * @return ResponseHeaderBag
+     */
+    public function getHeaders()
+    {
+        return $this->headers;
+    }
+
+    /**
+     * Returns error messages
+     *
+     * @access public
+     * @return array
+     */
+    public function getMessagesAction()
+    {
+        return $this->render(
+            'TeaAndCodeAPIBundle:API:messages.html.twig',
+            array(
+                'messages' => $this->messages
             )
         );
     }
@@ -135,7 +197,7 @@ abstract class APIController extends Controller
         $action = ucfirst(strtolower($this->request->getMethod()));
 
         // Adds api to the beginning to form the name of the function
-        $function = 'api' . $action . $function;
+        $function = 'api' . $action . $object;
 
         unset($parameters);
 
@@ -225,40 +287,6 @@ abstract class APIController extends Controller
     }
 
     /**
-     * Returns error messages
-     *
-     * @access public
-     * @return array
-     */
-    public function getMessagesAction()
-    {
-        return $this->render(
-            'TeaAndCodeAPIBundle:API:messages.html.twig',
-            array(
-                'messages' => $this->messages
-            )
-        );
-    }
-
-    /**
-     * Returns current error as a RuntimeException
-     *
-     * @param integer $code Specific error code
-     *
-     * @access public
-     * @return RuntimeException
-     */
-    public function getError($code = self::ERR_OK)
-    {
-        if ($code == self::ERR_OK || !isset($this->messages[$code]))
-        {
-            $code = $this->err;
-        }
-
-        return new \RuntimeException($this->messages[$code], $code);
-    }
-
-    /**
      * Takes error code and data to form a standard serialised response array
      *
      * @param array $data Data returned from API method as an array
@@ -268,18 +296,34 @@ abstract class APIController extends Controller
      */
     protected function sendResponse($data = null)
     {
-        $code  = 200;
-        $text  = 'OK';
-        $value = '';
+        $response = new Response();
 
-        if ($this->err != static::ERR_OK)
+        $response->setContent(
+            $this->serializer->serialize(
+                array(
+                    'error' => array(
+                        'code' => $this->err,
+                        'message' => $this->messages[$this->err]
+                    ),
+                    'data' => $this->_removeUnderscores($data)
+                ),
+                $this->request->getRequestFormat()
+            )
+        );
+
+        $response->headers = $this->headers;
+        $response->setProtocolVersion('1.1');
+
+        if ($this->err == static::ERR_OK)
         {
-            $code  = 400;
-            $text  = 'Bad Request';
-            $value = null;
+            $response->setStatusCode(200);
         }
-
-        return new Response(
+        else
+        {
+            $response->setStatusCode(400);
+        }
+/*
+        $response = new Response(
             $this->serializer->serialize(
                 array(
                     'error' => array(
@@ -292,11 +336,12 @@ abstract class APIController extends Controller
             ),
             $code,
             array(
-                'HTTP/1.1 ' . $code . ' ' . $text => $value,
                 'Access-Control-Allow-Origin'     => '*',
                 'Content-Type'                    => 'text/html'
             )
         );
+*/
+        return $response;
     }
 
     /**
