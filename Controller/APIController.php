@@ -302,10 +302,12 @@ abstract class APIController extends Controller
             $this->serializer->serialize(
                 array(
                     'error' => array(
-                        'code' => $this->err,
-                        'message' => $this->messages[$this->err]
+                        'code'    => $this->err,
+                        'message' => $this->get('translator')->trans(
+                            $this->messages[$this->err]
+                        )
                     ),
-                    'data' => $this->_removeUnderscores($data)
+                    'data'  => $this->_removeUnderscores($data)
                 ),
                 $this->request->getRequestFormat()
             )
@@ -313,34 +315,8 @@ abstract class APIController extends Controller
 
         $response->headers = $this->headers;
         $response->setProtocolVersion('1.1');
+        $response->setStatusCode(200);
 
-        if ($this->err == static::ERR_OK)
-        {
-            $response->setStatusCode(200);
-        }
-        else
-        {
-            $response->setStatusCode(400);
-        }
-/*
-        $response = new Response(
-            $this->serializer->serialize(
-                array(
-                    'error' => array(
-                        'code' => $this->err,
-                        'message' => $this->messages[$this->err]
-                    ),
-                    'data' => $this->_removeUnderscores($data)
-                ),
-                $this->request->getRequestFormat()
-            ),
-            $code,
-            array(
-                'Access-Control-Allow-Origin'     => '*',
-                'Content-Type'                    => 'text/html'
-            )
-        );
-*/
         return $response;
     }
 
