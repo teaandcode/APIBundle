@@ -39,6 +39,7 @@ abstract class APIController extends Controller
     const ERR_APP_NOT_FOUND     = 9001;
     const ERR_METHOD_NOT_FOUND  = 9002;
     const ERR_REDIRECT_MISMATCH = 9003;
+    const ERR_MULTIPLE_ERRORS   = 9004;
 
     /**
      * Stores current error code
@@ -47,6 +48,22 @@ abstract class APIController extends Controller
      * @var    integer $err
      */
     protected $err;
+
+    /**
+     * Stores list of errors encountered and their associated fields
+     *
+     * @access protected
+     * @var    array $errors
+     */
+    protected $errors;
+
+    /**
+     * Stores list of fields for error constants
+     *
+     * @access protected
+     * @var    array $fields
+     */
+    protected $fields;
 
     /**
      * ResponseHeaderBag
@@ -90,6 +107,9 @@ abstract class APIController extends Controller
     {
         $this->err = static::ERR_OK;
 
+        $this->errors = array();
+        $this->fields = array();
+
         $this->headers = new ResponseHeaderBag();
         $this->headers->add(
             array(
@@ -104,7 +124,8 @@ abstract class APIController extends Controller
             static::ERR_APP_NOT_FOUND     => 'No app entity was found',
             static::ERR_METHOD_NOT_FOUND  => 'The method could not be found',
             static::ERR_REDIRECT_MISMATCH => 'The redirect uri does not ' .
-                                             'match the app domain'
+                                             'match the app domain',
+            static::ERR_MULTIPLE_ERRORS   => 'There were multiple errors'
         );
 
         $this->serializer = new Serializer(
@@ -115,6 +136,34 @@ abstract class APIController extends Controller
                 'json' => new JsonEncoder(),
                 'xml'  => new XmlEncoder()
             )
+        );
+    }
+
+    /**
+     * Adds error to errors array
+     *
+     * Checks for code in fields array and if it exists adds the error to the
+     * errors array, if it does not exist returns true for early escape
+     *
+     * @param integer $code Specific error code
+     *
+     * @access public
+     * @return RuntimeException
+     */
+    public function addError($code)
+    {
+        if (!isset($this->fields[$code]))
+        {
+            $this->err = $code;
+
+            return true;
+        }
+
+        $this->errors[] = array(
+            'code'    => $code,
+            'message' => $this->get('translator')
+                            ->trans($this->messages[$code]),
+            'name'    => $this->fields[$code]
         );
     }
 
@@ -134,6 +183,16 @@ abstract class APIController extends Controller
         }
 
         return new \RuntimeException($this->messages[$code], $code);
+    }
+
+    public function hasErrors()
+    {
+        if (count($this->errors) > 0)
+        {
+            $this->err = static::ERR_MULTIPLE_ERRORS;
+
+            return true;
+        }
     }
 
     /**
@@ -189,7 +248,7 @@ abstract class APIController extends Controller
             return $this->sendResponse();
         }
 
-        $object = str_replace('-', ' ', $parameters[0]);
+        $object = str_replace('-', ' ', $parameters[1]);
         $object = ucwords($object);
         $object = str_replace(' ', '', $object);
 
@@ -303,6 +362,7 @@ abstract class APIController extends Controller
                 array(
                     'error' => array(
                         'code'    => $this->err,
+                        'fields'  => $this->errors,
                         'message' => $this->get('translator')->trans(
                             $this->messages[$this->err]
                         )

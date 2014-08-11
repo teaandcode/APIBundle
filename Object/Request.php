@@ -128,6 +128,22 @@ class Request
     }
 
     /**
+     * Check if single parameter is empty
+     *
+     * @param string $name The parameter's name
+     *
+     * @access public
+     * @return boolean
+     */
+    public function isParameterEmpty($name)
+    {
+        if (empty($this->_parameters[$name]))
+        {
+            return true;
+        }
+    }
+
+    /**
      * Check if single parameter is set
      *
      * @param string $name The parameter's name
@@ -141,7 +157,5 @@ class Request
         {
             return true;
         }
-
-        return false;
     }
 }
