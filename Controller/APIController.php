@@ -159,11 +159,14 @@ abstract class APIController extends Controller
             return true;
         }
 
-        $this->errors[] = array(
+        if (!isset($this->errors[$this->fields[$code]]))
+        {
+            $this->errors[$this->fields[$code]] = array();
+        }
+
+        $this->errors[$this->fields[$code]][] = array(
             'code'    => $code,
-            'message' => $this->get('translator')
-                            ->trans($this->messages[$code]),
-            'name'    => $this->fields[$code]
+            'message' => $this->get('translator')->trans($this->messages[$code])
         );
     }
 
@@ -185,6 +188,23 @@ abstract class APIController extends Controller
         return new \RuntimeException($this->messages[$code], $code);
     }
 
+    /**
+     * Returns errors array
+     *
+     * @access public
+     * @return array
+     */
+    public function getErrors()
+    {
+        return $this->errors;
+    }
+
+    /**
+     * Says whether any errors have been generated
+     *
+     * @access public
+     * @return boolean
+     */
     public function hasErrors()
     {
         if (count($this->errors) > 0)
